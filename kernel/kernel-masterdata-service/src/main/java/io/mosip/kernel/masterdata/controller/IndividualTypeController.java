@@ -194,4 +194,48 @@ public class IndividualTypeController {
 		responseWrapper.setResponse(individualTypeService.updateIndividualsTypes(individualTypeDto.getRequest()));
 		return responseWrapper;
 	}
+	
+		
+	/**
+	 * create Individual Type
+	 * 
+	 * 
+	 * @param individualType
+	 * @return
+	 */
+	@ResponseFilter
+	@PostMapping
+	@ApiOperation(value = "Service to create Individual Type", notes = "create Individual Type  and return  code and LangCode")
+	@ApiResponses({ @ApiResponse(code = 201, message = " successfully created"),
+			@ApiResponse(code = 400, message = " Request body passed  is null or invalid"),
+			@ApiResponse(code = 500, message = " creating any error occured") })
+	public ResponseWrapper<IndividualTypeExtnDto> createIndividualType(
+			@Valid @RequestBody RequestWrapper<IndividualTypeDto> individualType) {
+
+		ResponseWrapper<IndividualTypeExtnDto> responseWrapper = new ResponseWrapper<>();
+		responseWrapper
+				.setResponse(individualTypeService.createIndividualsTypes(individualType.getRequest()));
+		return responseWrapper;
+	}
+	/**
+	 * This method updates IndividualType by Admin.
+	 * 
+	 * @param individualTypeDto the request DTO for updating machine.
+	 * 
+	 * @return the response i.e. the updated machine.
+	 */
+	@PreAuthorize("hasAnyRole('GLOBAL_ADMIN')")
+	@ResponseFilter
+	@PutMapping()
+	@ApiOperation(value = "Service to upadte IndividualType", notes = "Update IndividualType Detail and return updated IndividualType")
+	@ApiResponses({ @ApiResponse(code = 201, message = "When IndividualType successfully updated"),
+			@ApiResponse(code = 400, message = "When Request body passed  is null or invalid"),
+			@ApiResponse(code = 404, message = "When No IndividualType found"),
+			@ApiResponse(code = 500, message = "While updating IndividualType any error occured") })
+	public ResponseWrapper<IndividualTypeExtnDto> updateIndividualType(
+			@RequestBody @Valid RequestWrapper<IndividualTypeDto> individualTypeDto) {
+		ResponseWrapper<IndividualTypeExtnDto> responseWrapper = new ResponseWrapper<>();
+		responseWrapper.setResponse(individualTypeService.updateIndividualsTypes(individualTypeDto.getRequest()));
+		return responseWrapper;
+	}
 }
