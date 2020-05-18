@@ -34,6 +34,7 @@ import org.springframework.beans.factory.InitializingBean;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+import io.mosip.kernel.core.exception.ExceptionUtils;
 import io.mosip.kernel.core.keymanager.exception.KeystoreProcessingException;
 import io.mosip.kernel.core.keymanager.exception.NoSuchSecurityProviderException;
 import io.mosip.kernel.core.logger.spi.Logger;
@@ -56,7 +57,7 @@ import sun.security.pkcs11.SunPKCS11;
 public class KeyStoreImpl implements io.mosip.kernel.core.keymanager.spi.KeyStore, InitializingBean {
 
 	private static final Logger LOGGER = KeymanagerLogger.getLogger(KeyStoreImpl.class);
-
+	
 	/**
 	 * Common name for generating certificate
 	 */
@@ -104,14 +105,15 @@ public class KeyStoreImpl implements io.mosip.kernel.core.keymanager.spi.KeyStor
 	 * The Keystore instance
 	 */
 	private KeyStore keyStore;
-
-	private Provider provider = null;
+	
+	private String providerName;
 
 	private static final int NO_OF_RETRIES = 3;
 
 	@Override
 	public void afterPropertiesSet() throws Exception {
-		provider = setupProvider(configPath);
+		Provider provider = setupProvider(configPath);
+		providerName = provider.getName();
 		addProvider(provider);
 		BouncyCastleProvider bouncyCastleProvider = new BouncyCastleProvider();
 		Security.addProvider(bouncyCastleProvider);
@@ -123,12 +125,12 @@ public class KeyStoreImpl implements io.mosip.kernel.core.keymanager.spi.KeyStor
 	/**
 	 * Setup a new SunPKCS11 provider
 	 * 
-	 * @param configPath
-	 *            The path of config file or keyStore in case of bouncycastle
-	 *            provider
+	 * @param configPath The path of config file or keyStore in case of bouncycastle
+	 *                   provider
 	 * @return Provider
 	 */
 	private Provider setupProvider(String configPath) {
+		Provider provider = null;
 		try {
 			switch (keystoreType) {
 			case "PKCS11":
@@ -159,8 +161,7 @@ public class KeyStoreImpl implements io.mosip.kernel.core.keymanager.spi.KeyStor
 	 * again with the "insertProvider."+provider.getName() permission target name.
 	 * If both checks are denied, a SecurityException is thrown.
 	 * 
-	 * @param provider
-	 *            the provider to be added
+	 * @param provider the provider to be added
 	 */
 	private void addProvider(Provider provider) {
 		if (-1 == Security.addProvider(provider)) {
@@ -176,10 +177,8 @@ public class KeyStoreImpl implements io.mosip.kernel.core.keymanager.spi.KeyStor
 	 * specified Provider object is returned. Note that the specified Provider
 	 * object does not have to be registered in the provider list.
 	 * 
-	 * @param keystoreType
-	 *            the type of keystore
-	 * @param provider
-	 *            provider
+	 * @param keystoreType the type of keystore
+	 * @param provider     provider
 	 * @return a keystore object of the specified type.
 	 */
 	private KeyStore getKeystoreInstance(String keystoreType, Provider provider) {
@@ -307,7 +306,7 @@ public class KeyStoreImpl implements io.mosip.kernel.core.keymanager.spi.KeyStor
 				isException = true;
 				expMessage = kse.getMessage();
 				exp = kse;
-				LOGGER.debug("sessionId", "KeyStoreImpl", "getAsymmetricKey", expMessage);
+				LOGGER.error("sessionId", "KeyStoreImpl", "getAsymmetricKey", ExceptionUtils.getStackTrace(kse));
 			}
 			if (isException) {
 				reloadProvider();
@@ -324,13 +323,12 @@ public class KeyStoreImpl implements io.mosip.kernel.core.keymanager.spi.KeyStor
 
 	private void reloadProvider() {
 		LOGGER.debug("sessionId", "KeyStoreImpl", "getAsymmetricKey", "reloading provider");
+		Security.removeProvider(providerName);
 		Provider provider = setupProvider(configPath);
-		Security.removeProvider(provider.getName());
 		addProvider(provider);
 		this.keyStore = getKeystoreInstance(keystoreType, provider);
 		loadKeystore();
 	}
-
 	/*
 	 * (non-Javadoc)
 	 * 
@@ -457,8 +455,7 @@ public class KeyStoreImpl implements io.mosip.kernel.core.keymanager.spi.KeyStor
 	/**
 	 * Sets keystore
 	 * 
-	 * @param keyStore
-	 *            keyStore
+	 * @param keyStore keyStore
 	 */
 	public void setKeyStore(KeyStore keyStore) {
 		this.keyStore = keyStore;
