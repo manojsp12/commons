@@ -135,7 +135,6 @@
 		<module>kernel-auditmanager-api</module>
 		<module>kernel-idgenerator-prid</module>
 		<module>kernel-idgenerator-vid</module>
-		<module>kernel-idgenerator-tokenid</module>
 		<module>kernel-idgenerator-machineid</module>
 		<module>kernel-idgenerator-regcenterid</module>
 		<module>kernel-idgenerator-mispid</module>
