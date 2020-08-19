@@ -9,7 +9,6 @@ import org.bouncycastle.cert.X509v3CertificateBuilder;
 import org.bouncycastle.cert.jcajce.JcaX509CertificateConverter;
 import org.bouncycastle.cert.jcajce.JcaX509ExtensionUtils;
 import org.bouncycastle.cert.jcajce.JcaX509v3CertificateBuilder;
-import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentSigner;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.jcajce.JcaContentSignerBuilder;
@@ -31,6 +30,7 @@ import java.util.Date;
  * @author Dharmesh Khandelwal
  * @since 1.0.0
  *
+ *@author Nagarjuna
  */
 public class CertificateUtility {
 	
@@ -39,7 +39,7 @@ public class CertificateUtility {
 	 */
 	private CertificateUtility() {
 	}
-
+	
 	/**
 	 * Generate X509 Certificate
 	 * 
@@ -53,8 +53,8 @@ public class CertificateUtility {
 	 * @return The certificate
 	 */
 	public static X509Certificate generateX509Certificate(KeyPair keyPair, String commonName, String organizationalUnit,
-			String organization, String country, LocalDateTime validityFrom, LocalDateTime validityTo,String providerName) {
-    	X509Certificate rootCert;
+			String organization, String country, LocalDateTime validityFrom, LocalDateTime validityTo, String providerName) {
+    	X509Certificate rootCert;    	
 		try {
 			BigInteger rootSerialNum = new BigInteger(Long.toString(new SecureRandom().nextLong()));
 	    	X500Name rootCertIssuer = new X500Name(getCertificateAttributes(commonName, organizationalUnit, organization, country));
